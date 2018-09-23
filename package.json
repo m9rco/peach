@@ -1,14 +1,13 @@
 {
-  "name": "peach-html",
-  "version": "1.4.16",
-  "description": "O2前端流程工具",
+  "name": "peach",
+  "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/o2team/peach.git"
+    "url": "git+https://github.com/PuShaoWei/peach.git"
   },
   "keywords": [
     "build"
@@ -22,9 +21,9 @@
     "peach": "bin/peach"
   },
   "bugs": {
-    "url": "https://github.com/o2team/peach/issues"
+    "url": "https://github.com/PuShaoWei/peach/issues"
   },
-  "homepage": "https://github.com/o2team/peach#readme",
+  "homepage": "https://github.com/PuShaoWei/peach#readme",
   "dependencies": {
     "archiver": "1.3.0",
     "athena-spritesmith": "0.0.15",
