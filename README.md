@@ -1296,7 +1296,7 @@ support : {
 > 上面的属性`rootValue`若设置为`0`表示不开启px转rem，若设置为非0正数，则表示`1rem=40px`，40为`rootValue`的值。
 > 同时，若需要支持高清图样式适配，那么图片请自行修改为`@2x`,`@3x`后缀名，如：`help@2x.png`
 
-以上面的配置为例，下面为转换过程，更多[参考](https://github.com/o2team/postcss-peach-spritesmith)
+以上面的配置为例，下面为转换过程，更多[参考](https://github.com/o2team/postcss-athena-spritesmith)
 
 #### source.css
 

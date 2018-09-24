@@ -87,31 +87,31 @@ var App = require('../lib/create/task/app');
 ├─ index.js                                                - 包入口
 ├─ lib                                                     - 主要逻辑功能
 │   ├─ build                                              - 编译相关的逻辑
-│   │   ├─ peach_mate									- 编译中用到的插件，gulp插件写法
-│   │   │   ├─ peach_build_filter.js					- 编译时的文件过滤，比如sass编译和图片压缩
-│   │   │   ├─ peach_combo.js							- 负责生成CSS页面片
-│   │   │   ├─ peach_compass.js							- 负责调用compass编译sass文件
-│   │   │   ├─ peach_concat.js							- 根据map.json以及static-conf.js进行静态资源代码合并，用于client编译模式
-│   │   │   ├─ peach_concat_core.js						- 代码合并功能
-│   │   │   ├─ peach_concat_server.js					- 只和并static-conf.js里配置的静态资源，用于server编译模式
+│   │   ├─ athena_mate									- 编译中用到的插件，gulp插件写法
+│   │   │   ├─ athena_build_filter.js					- 编译时的文件过滤，比如sass编译和图片压缩
+│   │   │   ├─ athena_combo.js							- 负责生成CSS页面片
+│   │   │   ├─ athena_compass.js							- 负责调用compass编译sass文件
+│   │   │   ├─ athena_concat.js							- 根据map.json以及static-conf.js进行静态资源代码合并，用于client编译模式
+│   │   │   ├─ athena_concat_core.js						- 代码合并功能
+│   │   │   ├─ athena_concat_server.js					- 只和并static-conf.js里配置的静态资源，用于server编译模式
 │   │   │   ├─ peach_csso.js							- 使用csso压缩CSS代码
-│   │   │   ├─ peach_ftp.js								- ftp上传
+│   │   │   ├─ athena_ftp.js								- ftp上传
 │   │   │   ├─ peach_if.js								- gulp-if
-│   │   │   ├─ peach_imagemin.js						- 图片压缩，只压缩了png格式
+│   │   │   ├─ athena_imagemin.js						- 图片压缩，只压缩了png格式
 │   │   │   ├─ peach_inject.js							- 解析页面语法，生成完整html文件，client模式使用
-│   │   │   ├─ peach_inject_server.js					- 解析页面语法，生成完整html文件，server模式使用
-│   │   │   ├─ peach_jdcfinder.js						- 向jdcfinder机器发布代码
-│   │   │   ├─ peach_plumber.js							- 提示任务流出错
+│   │   │   ├─ athena_inject_server.js					- 解析页面语法，生成完整html文件，server模式使用
+│   │   │   ├─ athena_jdcfinder.js						- 向jdcfinder机器发布代码
+│   │   │   ├─ athena_plumber.js							- 提示任务流出错
 │   │   │   ├─ peach_publish_filter.js					- 发布时缓存记录，用于过滤已发布文件，client模式
-│   │   │   ├─ peach_publish_filter_server.js			- 发布时缓存记录，用于过滤已发布文件，server模式
-│   │   │   ├─ peach_replace.js							- 地址替换，client模式
-│   │   │   ├─ peach_replace_server.js					- 地址替换，server模式
-│   │   │   ├─ peach_rev.js								- 文件加md5戳，client模式
-│   │   │   ├─ peach_rev_server.js						- 文件加md5戳，server模式
-│   │   │   ├─ peach_scan.js							- 代码扫描生成map.json，同时解析widget.load，client模式
-│   │   │   ├─ peach_scan_server.js						- 代码扫描生成map.json，同时解析widget.load，client模式
-│   │   │   ├─ peach_ssh.js								- 使用ssh2，包括向sftp服务器发布代码
-│   │   │   ├─ peach_uglify.js							- 使用uglify压缩js代码
+│   │   │   ├─ athena_publish_filter_server.js			- 发布时缓存记录，用于过滤已发布文件，server模式
+│   │   │   ├─ athena_replace.js							- 地址替换，client模式
+│   │   │   ├─ athena_replace_server.js					- 地址替换，server模式
+│   │   │   ├─ athena_rev.js								- 文件加md5戳，client模式
+│   │   │   ├─ athena_rev_server.js						- 文件加md5戳，server模式
+│   │   │   ├─ athena_scan.js							- 代码扫描生成map.json，同时解析widget.load，client模式
+│   │   │   ├─ athena_scan_server.js						- 代码扫描生成map.json，同时解析widget.load，client模式
+│   │   │   ├─ athena_ssh.js								- 使用ssh2，包括向sftp服务器发布代码
+│   │   │   ├─ athena_uglify.js							- 使用uglify压缩js代码
 │   │   │   └─ index.js									- 入口文件，暴露方法
 │   │   ├─ font_compress									- 字体压缩相关
 │   │   │   ├─ compress
@@ -130,8 +130,8 @@ var App = require('../lib/create/task/app');
 │   │   ├─ index.js										- 编译的主入口文件，组织编译任务，实现编译、预览、发布、拷贝组件的逻辑，供外界调用
 │   │   └─ tasks											- 所有编译任务
 │   │       ├─ all.js										- 拷贝指定代码目录代码到dist/_目录下
-│   │       ├─ peach_mate.js								- 负责扫描代码，以及代码合并，解析widget.load工作，client模式
-│   │       ├─ peach_mate_server.js						- 负责扫描代码，以及代码合并，解析widget.load工作，server模式
+│   │       ├─ athena_mate.js								- 负责扫描代码，以及代码合并，解析widget.load工作，client模式
+│   │       ├─ athena_mate_server.js						- 负责扫描代码，以及代码合并，解析widget.load工作，server模式
 │   │       ├─ clone.js									- 拷贝组件
 │   │       ├─ compress.js								- 代码压缩，client模式
 │   │       ├─ compress_server.js							- 代码压缩，server模式
@@ -212,7 +212,7 @@ var App = require('../lib/create/task/app');
 
 #### 编译概述
 
-`build`目录中是所有的编译相关逻辑，其中`task`目录下是所有的编译任务，`peach_mate`目录中是编译任务中使用到的插件，由于peach核心采用的是**Gulp**的`vinyl-fs`包来实现文件的流式处理方式，所以插件的写法基本都是**Gulp**插件的写法，具体可以参见[编写gulp插件](http://www.gulpjs.com.cn/docs/writing-a-plugin/)
+`build`目录中是所有的编译相关逻辑，其中`task`目录下是所有的编译任务，`athena_mate`目录中是编译任务中使用到的插件，由于peach核心采用的是**Gulp**的`vinyl-fs`包来实现文件的流式处理方式，所以插件的写法基本都是**Gulp**插件的写法，具体可以参见[编写gulp插件](http://www.gulpjs.com.cn/docs/writing-a-plugin/)
 
 ```javascript
 // 使用through2包处理文件流
@@ -236,7 +236,7 @@ module.exports = function (options) {
 };
 ```
 
-在`tasks`的任务中会调用`peach_mate`中写好的插件，而为了做好任务流程控制，使用了`ES6 Promise`，任务写法都是返回一个返回值是返回`Promise`对象的函数，例如最简单的拷贝文件的任务
+在`tasks`的任务中会调用`athena_mate`中写好的插件，而为了做好任务流程控制，使用了`ES6 Promise`，任务写法都是返回一个返回值是返回`Promise`对象的函数，例如最简单的拷贝文件的任务
 
 ```javascript
 'use strict';
@@ -285,7 +285,7 @@ function buildSingleModule (app, mod, conf, args) {
   var lessPromise = taskList.less($, conf.appConf, conf.moduleConf, args);
   var csslintPromise = taskList.csslint($, conf.appConf, conf.moduleConf, args);
   var jshintPromise = taskList.jshint($, conf.appConf, conf.moduleConf, args);
-  var peachMatePromise = taskList.peach_mate($, conf.appConf, conf.moduleConf, args);
+  var peachMatePromise = taskList.athena_mate($, conf.appConf, conf.moduleConf, args);
   var stylesPromise = taskList.styles($, conf.appConf, conf.moduleConf, args);
   var scriptsPromise = taskList.scripts($, conf.appConf, conf.moduleConf, args);
   var compressPromise = taskList.compress($, conf.appConf, conf.moduleConf, args);
@@ -625,11 +625,11 @@ png图片压缩，源码改自第三方项目[node-pngquant-native](https://gith
 
 项目地址[https://github.com/o2team/peach-png-native](https://github.com/o2team/peach-png-native)
 
-#### **postcss-peach-spritesmith**
+#### **postcss-athena-spritesmith**
 
 针对peach订制的CSS雪碧图工具，源码改自[postcss-sprite](https://github.com/2createStudio/postcss-sprites)
 
-项目地址[https://github.com/o2team/postcss-peach-spritesmith](https://github.com/o2team/postcss-peach-spritesmith)
+项目地址[https://github.com/o2team/postcss-athena-spritesmith](https://github.com/o2team/postcss-athena-spritesmith)
 
 ### 如何开发
 
@@ -725,7 +725,7 @@ module.exports = function ($, appConf, moduleConf, args) {
 
 可以注意到上面代码包含了一个小型插件的逻辑，所以我们可以把加版权信息的功能做成一个插件，这样就可以进行复用
 
-在`/lib/build/peach_mate`中新增`peach_copyright.js`文件，同时在`index.js`中将它暴露出来。
+在`/lib/build/athena_mate`中新增`peach_copyright.js`文件，同时在`index.js`中将它暴露出来。
 
 ```javascript
 // /lib/build/index.js
@@ -739,7 +739,7 @@ module.exports = {
 ```
 
 ```javascript
-// /lib/build/peach_mate/peach_copyright.js
+// /lib/build/athena_mate/peach_copyright.js
 
 'use strict';
 
@@ -789,7 +789,7 @@ module.exports = function ($, appConf, moduleConf, args) {
     return new Promise(function (resolve, reject) {
       var vfs = require('vinyl-fs');
       var path = require('path');
-      var peachMate = require('../peach_mate');
+      var peachMate = require('../athena_mate');
 
       // 找到上线前所有文件
       return vfs.src(path.join(modulePath, 'dist', 'output', '**'))

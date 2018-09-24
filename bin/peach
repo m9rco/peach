@@ -1,4 +1,5 @@
 #! /usr/bin/env node
+
 /**
  * 主入口，程序控制
  */
@@ -14,7 +15,9 @@ var del = require('del');
 var _ = require('lodash');
 var Table = require('cli-table');
 var fse = require('fs-extra');
-var $ = require('gulp-load-plugins')({lazy: true});
+var $ = require('gulp-load-plugins')({
+  lazy: true
+});
 var autoprefixer = require('autoprefixer');
 var ora = require('ora')
 
@@ -36,7 +39,7 @@ var config = Util.getConfig();
 var setting = Util.getSetting();
 
 // 数据上报
-function report (command, reportPath, args, processParams, cb) {
+function report(command, reportPath, args, processParams, cb) {
   var reportBlacklist = config.report_black_list ? config.report_black_list : [];
   var requestParams = {
     cmd: command,
@@ -48,16 +51,16 @@ function report (command, reportPath, args, processParams, cb) {
   if (typeof processParams === 'function') {
     processParams(requestParams);
   }
-  if (reportBlacklist.indexOf(requestParams.appId) >= 0
-    || reportBlacklist.indexOf(requestParams.appName) >= 0
-    || reportBlacklist.indexOf(requestParams.app) >= 0) {
+  if (reportBlacklist.indexOf(requestParams.appId) >= 0 ||
+    reportBlacklist.indexOf(requestParams.appName) >= 0 ||
+    reportBlacklist.indexOf(requestParams.app) >= 0) {
     return;
   }
   if (typeof cb !== 'function') {
     cb = function () {};
   }
-   cb(body);
-   return;
+  cb();
+  return;
 
   request.post(setting.report_url + reportPath, {
     form: requestParams,
@@ -82,15 +85,16 @@ function report (command, reportPath, args, processParams, cb) {
 }
 
 // 打印一下peach的Logo
-function printpeach () {
+function printpeach() {
   var peachText = fs.readFileSync(path.join(Util.getRootPath(), 'peach.txt'));
   console.log(gutil.colors.blue(String(peachText)));
 }
 
 // 检测peach版本
-function checkpeachVersion (successCb, errorCb) {
-   errorCb && errorCb(err);
-   return;
+function checkpeachVersion(successCb, errorCb) {
+     errorCb && errorCb();
+     return;
+
   request.get(setting.report_url + getVersionPath, function (err, res, body) {
     if (err) {
       errorCb && errorCb(err);
@@ -116,8 +120,7 @@ function checkpeachVersion (successCb, errorCb) {
   });
 }
 // 新版本更新提醒功能
-function remindNewVersion (cb) {
-  return;
+function remindNewVersion(cb) {
   var remindFile = path.join(Util.getpeachPath(), '.remind.json');
   var remindInfo = {};
   if (Util.existsSync(remindFile)) {
@@ -178,9 +181,9 @@ function remindNewVersion (cb) {
 }
 
 // 安装某一版本peach
-function installpeach (installParams, spinner) {
+function installpeach(installParams, spinner) {
   var exec = require('child_process').exec;
-  var shellCode = 'npm install -g peach@' + installParams.version + ' --registry=http://registry.npm.taobao.org --disturl=http://npm.taobao.org/mirrors/node';
+  var shellCode = 'npm install -g peach-html@' + installParams.version + ' --registry=http://registry.npm.taobao.org --disturl=http://npm.taobao.org/mirrors/node';
   // 非windows
   if (process.platform !== 'win32') {
     var nodeInstallPath = process.execPath;
@@ -223,41 +226,41 @@ program
   .action(function (url) {
     remindNewVersion(function () {
       console.log(chalk.magenta('  Allo ' + userName + '! 开始愉快工作吧~'));
-        if (!url) {
-          url = process.cwd();
-          console.log('  即将设置工作目录为当前目录！');
-        } else {
-          console.log('  即将设置工作目录为：', url);
+      if (!url) {
+        url = process.cwd();
+        console.log('  即将设置工作目录为当前目录！');
+      } else {
+        console.log('  即将设置工作目录为：', url);
+      }
+      console.log();
+      var prompt = [];
+      if (!config.work_space) {
+        config.work_space = url;
+      } else {
+        if (config.work_space !== url) {
+          prompt.push({
+            type: 'confirm',
+            name: 'needNewWorkSpace',
+            message: '已经设置过工作目录' + config.work_space + '，是否要以新目录为工作目录？',
+            default: false
+          });
         }
-        console.log();
-        var prompt = [];
-        if (!config.work_space) {
+      }
+      prompt.push({
+        type: 'input',
+        name: 'userName',
+        message: '雁过留声，人过留名~~',
+        default: userName
+      });
+      inquirer.prompt(prompt, function (answers) {
+        if (answers.needNewWorkSpace) {
           config.work_space = url;
-        } else {
-          if (config.work_space !== url) {
-            prompt.push({
-              type: 'confirm',
-              name: 'needNewWorkSpace',
-              message: '已经设置过工作目录' + config.work_space + '，是否要以新目录为工作目录？',
-              default: false
-            });
-          }
         }
-        prompt.push({
-          type: 'input',
-          name: 'userName',
-          message: '雁过留声，人过留名~~',
-          default: userName
-        });
-        inquirer.prompt(prompt, function (answers) {
-          if (answers.needNewWorkSpace) {
-            config.work_space = url;
-          }
-          config.user_name = answers.userName;
-          Util.setConfig(config);
-        });
+        config.user_name = answers.userName;
+        Util.setConfig(config);
+      });
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach init');
@@ -275,7 +278,7 @@ program
   .option('--less', '启用less')
   .option('--template [templateName]', '设置模板')
   .option('--debug', '打印调试信息')
-  .action(function(appName, option) {
+  .action(function (appName, option) {
     remindNewVersion(function () {
       var app = new App({
         appName: appName || option.name,
@@ -302,7 +305,7 @@ program
         });
       });
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach app cx');
@@ -320,7 +323,7 @@ program
   .option('--sass', '启用sass')
   .option('--less', '启用less')
   .option('--debug', '打印调试信息')
-  .action(function(moduleName, option) {
+  .action(function (moduleName, option) {
     remindNewVersion(function () {
       if (moduleName) {
         // 支持一次性创建多个模块
@@ -345,7 +348,7 @@ program
         createModule(moduleName, option);
       }
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach module my');
@@ -355,7 +358,7 @@ program
   });
 
 // 创建单个模块
-function createModule (moduleName, option) {
+function createModule(moduleName, option) {
   return new Promise(function (resolve, reject) {
     var mmodule = new MModule({
       moduleName: moduleName || option.name,
@@ -401,7 +404,7 @@ program
   .option('--less', '启用less')
   .option('--remote [remoteName]', '选择域')
   .option('--debug', '打印调试信息')
-  .action(function(pageName, option) {
+  .action(function (pageName, option) {
     remindNewVersion(function () {
       var page = new Page({
         pageName: pageName || option.name,
@@ -436,7 +439,7 @@ program
         }
       });
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach page shop');
@@ -455,7 +458,7 @@ program
   .option('--cms', '指定这是供CMS使用的楼层组件')
   .option('--debug', '打印调试信息')
   .description('创建新的组件')
-  .action(function(widgetName, option) {
+  .action(function (widgetName, option) {
     remindNewVersion(function () {
       var widget = new Widget({
         widgetName: widgetName || option.name,
@@ -489,7 +492,7 @@ program
         }
       });
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach widget topbar');
@@ -523,39 +526,43 @@ program
       var appPath = path.join(path.resolve(modulePath, '..'));
       var appConf = require(path.join(appPath, 'app-conf.js'));
       var archiver = require('archiver');
-      var archive = archiver('tar', { gzip: {level: 9} });
+      var archive = archiver('tar', {
+        gzip: {
+          level: 9
+        }
+      });
       var tmpZipPath = path.join(modulePath, 'widget', widgetName, widgetName + '.tgz');
       var output = fs.createWriteStream(tmpZipPath);
 
       var prompts = [];
       var tmpchoices = [];
       // 请求业务清单
-      var requestBusinessPromise = new Promise(function(resolve, reject) {
-        request.get(setting.component_platform + '/api/business/list', function(err, res, body) {
-          if(!err && res.statusCode === 200) {
-            resolve( JSON.parse(body) );
+      var requestBusinessPromise = new Promise(function (resolve, reject) {
+        request.get(setting.component_platform + '/api/business/list', function (err, res, body) {
+          if (!err && res.statusCode === 200) {
+            resolve(JSON.parse(body));
           } else {
             reject(err);
           }
         });
       });
       // 请求类别清单
-      var requestClassifyPromise = new Promise(function(resolve, reject) {
-        request.get(setting.component_platform + '/api/classify/list', function(err, res, body) {
-          if(!err && res.statusCode === 200) {
-            resolve( JSON.parse(body) );
+      var requestClassifyPromise = new Promise(function (resolve, reject) {
+        request.get(setting.component_platform + '/api/classify/list', function (err, res, body) {
+          if (!err && res.statusCode === 200) {
+            resolve(JSON.parse(body));
           } else {
             reject(err);
           }
         });
       });
-      Promise.resolve().then(function() {
+      Promise.resolve().then(function () {
         return requestBusinessPromise;
-      }).then(function(business) {
-        if(business.length>0) {
+      }).then(function (business) {
+        if (business.length > 0) {
           business.forEach(function (o, i) {
             tmpchoices.push({
-              name : o.name,
+              name: o.name,
               value: o.objectId
             });
           });
@@ -568,12 +575,12 @@ program
         }
 
         return requestClassifyPromise;
-      }).then(function(classify) {
-        if(classify.length>0) {
+      }).then(function (classify) {
+        if (classify.length > 0) {
           tmpchoices = [];
           classify.forEach(function (o, i) {
             tmpchoices.push({
-              name : o.name,
+              name: o.name,
               value: o.objectId
             });
           });
@@ -592,16 +599,18 @@ program
           var scssImportsPath = path.join(copyFolder, '_imports');
           var scssBuildCssFolder = path.join(copyFolder, '_css');
           var scssBuildCssFile = path.join(copyFolder, '_build_' + widgetName + '.css');
-          del.sync(copyFolder, {force: true});
-          Promise.resolve().then(function() {
-            return new Promise(function(resolve, reject) {
-              if(Util.existsSync(scssFilePath)) {
+          del.sync(copyFolder, {
+            force: true
+          });
+          Promise.resolve().then(function () {
+            return new Promise(function (resolve, reject) {
+              if (Util.existsSync(scssFilePath)) {
                 // 编译SCSS并处理CSS
                 var vfs = require('vinyl-fs');
                 var through2 = require('through2');
-                var sprites = require('peach-spritesmith');
+                var sprites = require('athena-spritesmith');
                 var pxtorem = require('postcss-pxtorem');
-                var peachMate = require('../lib/build/peach_mate');
+                var peachMate = require('../lib/build/athena_mate');
                 //是否开启px转rem
                 var px2rem = moduleConf.support.px2rem;
                 //是否开启雪碧图合并
@@ -618,10 +627,12 @@ program
                 }
 
                 var processors = [
-                  autoprefixer({browsers: browsers})
+                  autoprefixer({
+                    browsers: browsers
+                  })
                 ];
 
-                if( px2rem && px2rem.enable !== false ){
+                if (px2rem && px2rem.enable !== false) {
                   processors.push(pxtorem({
                     root_value: px2rem.root_value,
                     unit_precision: px2rem.unit_precision,
@@ -632,7 +643,7 @@ program
                   }));
                 }
 
-                if(csssprite && csssprite.enable !== false){
+                if (csssprite && csssprite.enable !== false) {
                   var opts = {
                     outputDimensions: true,
                     stylesheetPath: scssBuildCssFolder,
@@ -655,7 +666,7 @@ program
                     var imports = Util.mapScssImports(scssFilePath);
                     // 清空/创建
                     fse.emptydirSync(scssImportsPath);
-                    if(imports.length > 0) {
+                    if (imports.length > 0) {
                       imports.forEach(function (e) {
                         console.log(chalk.green(e.path));
                         var basename = path.basename(e.path);
@@ -663,166 +674,166 @@ program
                       });
                     }
                     vfs.src([path.join(copyFolder, '*.scss'), path.join(copyFolder, '*.sass')])
-                    .on('finish', function () {
-                      console.log(chalk.magenta('  开始组件SASS本地编译任务'));
-                    })
-                    .pipe(peachMate.compass({
-                      cwd: appPath,
-                      module: moduleConf.module,
-                      sass: copyFolder,
-                      css: scssBuildCssFolder,
-                      sasslib : [scssImportsPath]
-                    }))
-                    .on('data', function () {})
-                    .on('end', function () {
-                      var spriteImages = [];
-                      vfs.src([path.join(scssBuildCssFolder, '*.css'), path.join(copyFolder, '*.html'), path.join(copyFolder, '*.js')])
-                        .pipe($.if('*.css', through2.obj(function (file, encoding, cb) {
-                          if (file.isNull() || file.isStream()) {
-                            return cb(null);
-                          }
-                          var fileContents = file.contents.toString();
-                          Util.processCss(fileContents, function (value) {
-                            var _value = value.replace(/\"/g, '').replace(/\'/g, '');
-                            var extname = path.extname(_value);
-                            var dirname = path.dirname(value);
-                            var dirnameArr = dirname.split('/');
-                            var imagesIndex = dirnameArr.indexOf('images');
-                            if (!Util.regexps.url.test(value) && value.length > 0
-                              && value.indexOf('data:image') < 0
-                              && typeof extname === 'string'
-                              && extname.length > 0
-                              && imagesIndex >= 0) {
-                              var spriteReg = /\?__sprite(.*)+/gi;
-                              if (spriteReg.test(_value)) {
-                                _value = _value.split('/').splice(imagesIndex).join('/').replace(spriteReg, '');
-                                spriteImages.push(_value);
-                              }
+                      .on('finish', function () {
+                        console.log(chalk.magenta('  开始组件SASS本地编译任务'));
+                      })
+                      .pipe(peachMate.compass({
+                        cwd: appPath,
+                        module: moduleConf.module,
+                        sass: copyFolder,
+                        css: scssBuildCssFolder,
+                        sasslib: [scssImportsPath]
+                      }))
+                      .on('data', function () {})
+                      .on('end', function () {
+                        var spriteImages = [];
+                        vfs.src([path.join(scssBuildCssFolder, '*.css'), path.join(copyFolder, '*.html'), path.join(copyFolder, '*.js')])
+                          .pipe($.if('*.css', through2.obj(function (file, encoding, cb) {
+                            if (file.isNull() || file.isStream()) {
+                              return cb(null);
                             }
-                            return value;
-                          });
-                          this.push(file);
-                          cb();
-                        })))
-                        .pipe($.if('*.css', $.postcss(processors)))
-                        .pipe($.if('*.css', $.postcss([sprites(opts)])))
-                        .pipe(through2.obj(function (file, encoding, cb) {
-                          if (file.isNull() || file.isStream()) {
-                            return cb(null);
-                          }
-                          function getInline (value) {
-                            var vStart = '';
-                            var vEnd = '';
-                            var extname = path.extname(value);
-                            if (value.indexOf('\"') >= 0 || value.indexOf('\'') >= 0) {
-                              vStart = value[0];
-                              vEnd = value[value.length - 1];
-                              value = value.replace(/\"/g, '').replace(/\'/g, '');
-                            }
-                            var dirname = path.dirname(value);
-                            var dirnameArr = dirname.split('/');
-                            var imagesIndex = dirnameArr.indexOf('images');
-                            if (!Util.regexps.url.test(value) && value.length > 0
-                              && value.indexOf('data:image') < 0
-                              && typeof extname === 'string'
-                              && extname.length > 0
-                              && imagesIndex >= 0) {
-                              value = value.split('/').splice(imagesIndex).join('/');
-                              var pathName = path.join(copyFolder, value);
-                              var query = Util.getQueryObj(pathName);
-                              var size = 0;
-                              pathName = pathName.split('?')[0];
-                              if (!Util.existsSync(pathName)) {
-                                console.log(chalk.red('  文件' + path.basename(file.path) + '中引用的资源' + value + '不存在，请检查！'));
-                                return vStart + value + vEnd;
+                            var fileContents = file.contents.toString();
+                            Util.processCss(fileContents, function (value) {
+                              var _value = value.replace(/\"/g, '').replace(/\'/g, '');
+                              var extname = path.extname(_value);
+                              var dirname = path.dirname(value);
+                              var dirnameArr = dirname.split('/');
+                              var imagesIndex = dirnameArr.indexOf('images');
+                              if (!Util.regexps.url.test(value) && value.length > 0 &&
+                                value.indexOf('data:image') < 0 &&
+                                typeof extname === 'string' &&
+                                extname.length > 0 &&
+                                imagesIndex >= 0) {
+                                var spriteReg = /\?__sprite(.*)+/gi;
+                                if (spriteReg.test(_value)) {
+                                  _value = _value.split('/').splice(imagesIndex).join('/').replace(spriteReg, '');
+                                  spriteImages.push(_value);
+                                }
                               }
-                              if (Util.regexps.images.test(path.basename(pathName))) {
-                                // 判断是否有__inline标或者是打开了base64开关被excluded
-                                var base64Opts = moduleConf.support.base64 || {
-                                  enable: false,
-                                  exclude: [],
-                                  size: 5000
-                                };
-                                var baseExclude = base64Opts.exclude;
-                                if (query.__inline || base64Opts.enable && (!baseExclude || _.isArray(baseExclude) && baseExclude.indexOf(value) === -1)) {
-                                  try {
-                                    size = fs.statSync(pathName).size;
-                                    if (query.__inline || size < config.base64Opts.size) {
-                                      return vStart + Util.transform2DataURI(pathName) + vEnd;
+                              return value;
+                            });
+                            this.push(file);
+                            cb();
+                          })))
+                          .pipe($.if('*.css', $.postcss(processors)))
+                          .pipe($.if('*.css', $.postcss([sprites(opts)])))
+                          .pipe(through2.obj(function (file, encoding, cb) {
+                            if (file.isNull() || file.isStream()) {
+                              return cb(null);
+                            }
+
+                            function getInline(value) {
+                              var vStart = '';
+                              var vEnd = '';
+                              var extname = path.extname(value);
+                              if (value.indexOf('\"') >= 0 || value.indexOf('\'') >= 0) {
+                                vStart = value[0];
+                                vEnd = value[value.length - 1];
+                                value = value.replace(/\"/g, '').replace(/\'/g, '');
+                              }
+                              var dirname = path.dirname(value);
+                              var dirnameArr = dirname.split('/');
+                              var imagesIndex = dirnameArr.indexOf('images');
+                              if (!Util.regexps.url.test(value) && value.length > 0 &&
+                                value.indexOf('data:image') < 0 &&
+                                typeof extname === 'string' &&
+                                extname.length > 0 &&
+                                imagesIndex >= 0) {
+                                value = value.split('/').splice(imagesIndex).join('/');
+                                var pathName = path.join(copyFolder, value);
+                                var query = Util.getQueryObj(pathName);
+                                var size = 0;
+                                pathName = pathName.split('?')[0];
+                                if (!Util.existsSync(pathName)) {
+                                  console.log(chalk.red('  文件' + path.basename(file.path) + '中引用的资源' + value + '不存在，请检查！'));
+                                  return vStart + value + vEnd;
+                                }
+                                if (Util.regexps.images.test(path.basename(pathName))) {
+                                  // 判断是否有__inline标或者是打开了base64开关被excluded
+                                  var base64Opts = moduleConf.support.base64 || {
+                                    enable: false,
+                                    exclude: [],
+                                    size: 5000
+                                  };
+                                  var baseExclude = base64Opts.exclude;
+                                  if (query.__inline || base64Opts.enable && (!baseExclude || _.isArray(baseExclude) && baseExclude.indexOf(value) === -1)) {
+                                    try {
+                                      size = fs.statSync(pathName).size;
+                                      if (query.__inline || size < config.base64Opts.size) {
+                                        return vStart + Util.transform2DataURI(pathName) + vEnd;
+                                      }
+                                    } catch (e) {
+                                      gutil.log(gutil.colors.red('无法转base64，文件' + pathName + '没有找到！'));
+                                      return vStart + value + vEnd;
                                     }
-                                  }
-                                  catch (e) {
-                                    gutil.log(gutil.colors.red('无法转base64，文件' + pathName + '没有找到！'));
-                                    return vStart + value + vEnd;
                                   }
                                 }
                               }
+                              return vStart + value + vEnd;
                             }
-                            return vStart + value + vEnd;
-                          }
-                          var fileContents = file.contents.toString();
-                          var fPath = file.path;
-                          if (Util.regexps.css.test(fPath)) {
-                            fileContents = Util.processCss(fileContents, function (value) {
-                              return getInline(value);
+                            var fileContents = file.contents.toString();
+                            var fPath = file.path;
+                            if (Util.regexps.css.test(fPath)) {
+                              fileContents = Util.processCss(fileContents, function (value) {
+                                return getInline(value);
+                              });
+                            } else if (Util.regexps.js.test(fPath)) {
+                              fileContents = Util.processJs(fileContents, function (value) {
+                                return getInline(value);
+                              });
+                            } else if (Util.regexps.tpl.test(fPath)) {
+                              fileContents = Util.processHtml(fileContents, function (value) {
+                                return getInline(value);
+                              });
+                            }
+                            file.contents = new Buffer(fileContents);
+                            this.push(file);
+                            cb();
+                          }))
+                          .pipe(through2.obj(function (file, encoding, cb) {
+                            var dirname = path.dirname(file.path);
+                            var basename = path.basename(file.path);
+                            if (!/_build_/.test(basename)) {
+                              file.path = path.join(dirname, '_build_' + basename);
+                            }
+                            this.push(file);
+                            cb();
+                          }))
+                          .pipe(vfs.dest(copyFolder))
+                          .on('finish', function () {
+                            del.sync(scssBuildCssFolder, {
+                              force: true
                             });
-                          } else if (Util.regexps.js.test(fPath)) {
-                            fileContents = Util.processJs(fileContents, function (value) {
-                              return getInline(value);
-                            });
-                          } else if (Util.regexps.tpl.test(fPath)) {
-                            fileContents = Util.processHtml(fileContents, function (value) {
-                              return getInline(value);
-                            });
-                          }
-                          file.contents = new Buffer(fileContents);
-                          this.push(file);
-                          cb();
-                        }))
-                        .pipe(through2.obj(function (file, encoding, cb) {
-                          var dirname = path.dirname(file.path);
-                          var basename = path.basename(file.path);
-                          if(!/_build_/.test(basename)) {
-                            file.path = path.join(dirname, '_build_' + basename);
-                          }
-                          this.push(file);
-                          cb();
-                        }))
-                        .pipe(vfs.dest(copyFolder))
-                        .on('finish', function() {
-                          del.sync(scssBuildCssFolder, {force: true});
-                          fs.writeFileSync(path.join(copyFolder, '_sprite_images.json'), JSON.stringify({
-                            sprites: spriteImages
-                          }, null, 2));
-                          resolve();
-                        })
-                        .on('error', function(err) {
-                          console.log('编译过程发生错误');
-                          reject();
-                        });
-                    })
-                    .on('error', function (err) {
-                      console.log('编译过程发生错误');
-                      throw err;
-                    });
+                            fs.writeFileSync(path.join(copyFolder, '_sprite_images.json'), JSON.stringify({
+                              sprites: spriteImages
+                            }, null, 2));
+                            resolve();
+                          })
+                          .on('error', function (err) {
+                            console.log('编译过程发生错误');
+                            reject();
+                          });
+                      })
+                      .on('error', function (err) {
+                        console.log('编译过程发生错误');
+                        throw err;
+                      });
                   });
               } else {
                 resolve();
               }
             })
-          }).then(function() {
+          }).then(function () {
             console.log(chalk.magenta('  正在发布组件，请稍等...'));
-            archive.on('error', function(err){
+            archive.on('error', function (err) {
               throw err;
             });
             archive.pipe(output);
-            archive.bulk([
-              {
-                expand: true,
-                cwd: copyFolder,
-                src: ['**/*']
-              }
-            ]).finalize();
+            archive.bulk([{
+              expand: true,
+              cwd: copyFolder,
+              src: ['**/*']
+            }]).finalize();
             output.on('close', function () {
               var formData = {
                 appId: appConf.appId,
@@ -850,13 +861,17 @@ program
               request.post({
                 url: setting.component_platform + '/api/push',
                 headers: {
-                  'Content-Type': 'multipart/form-data; boundary="'+ boundaryKey +'"'
+                  'Content-Type': 'multipart/form-data; boundary="' + boundaryKey + '"'
                 },
                 formData: formData
-              }, function(err, res, body) {
+              }, function (err, res, body) {
                 if (err) {
-                  del.sync(tmpZipPath, {force: true});
-                  del.sync(copyFolder, {force: true});
+                  del.sync(tmpZipPath, {
+                    force: true
+                  });
+                  del.sync(copyFolder, {
+                    force: true
+                  });
                   throw err;
                 }
                 var result = null;
@@ -867,16 +882,24 @@ program
                 }
                 if (res.statusCode === 200) {
                   console.log(chalk.green('  组件发布成功！'));
-                  del.sync(tmpZipPath, {force: true});
-                  del.sync(copyFolder, {force: true});
+                  del.sync(tmpZipPath, {
+                    force: true
+                  });
+                  del.sync(copyFolder, {
+                    force: true
+                  });
                   if (result && result.no === 0) {
                     var data = result.data;
                     console.log(chalk.green('  请访问：' + setting.component_platform + '/#!/detail/' + data.id));
                   }
                 } else {
-                  del.sync(tmpZipPath, {force: true});
-                  del.sync(copyFolder, {force: true});
-                  if(result && result.type == 'unauth') {
+                  del.sync(tmpZipPath, {
+                    force: true
+                  });
+                  del.sync(copyFolder, {
+                    force: true
+                  });
+                  if (result && result.type == 'unauth') {
                     console.log(chalk.red('  用户不在白名单之内，请联系管理人员。'));
                   } else {
                     console.log(chalk.red('  组件发布失败，请重试！'));
@@ -884,15 +907,19 @@ program
                 }
               });
             });
-          }).catch(function(err) {
-            del.sync(tmpZipPath, {force: true});
-            del.sync(copyFolder, {force: true});
+          }).catch(function (err) {
+            del.sync(tmpZipPath, {
+              force: true
+            });
+            del.sync(copyFolder, {
+              force: true
+            });
             throw err;
           })
         });
-      }).catch(function(err) {
-        if(err) {
-          if(err.code) {
+      }).catch(function (err) {
+        if (err) {
+          if (err.code) {
             console.log(chalk.red('  ' + err.code));
           } else {
             console.log(err);
@@ -903,7 +930,7 @@ program
         }
       });
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach widget-publish tab');
@@ -930,7 +957,7 @@ program
       var remoteUrl = setting.component_platform + '/api/pull/' + uuid;
       loadRemoteWidget(remoteUrl, uuid, option);
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach widget-load 749c39b0-4357-11e6-adbc-dfa2f92dcb1c --alias tab');
@@ -945,14 +972,14 @@ program
   .option('-w, --widget [widgetName]', '组件名称')
   .option('--debug', '打印调试信息')
   .description('加载一个远程的组件')
-  .action(function(widgetName, option) {
+  .action(function (widgetName, option) {
     remindNewVersion(function () {
       widgetName = widgetName || option.widget;
       var wname = widgetName.split('~');
       var remoteUrl = setting.remote_widget_url + '?cate=' + wname[0] + '&filename=' + wname[1];
       loadRemoteWidget(remoteUrl, widgetName, option);
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach widget-remote timeline~pf_160322_1');
@@ -960,67 +987,67 @@ program
     console.log();
   });
 
-function loadRemoteWidget (remoteUrl, widgetName, option) {
+function loadRemoteWidget(remoteUrl, widgetName, option) {
   var widgetName = widgetName || option.widget;
   var widgetAlias = option.alias;
   var remoteWidgetNameUrl = setting.component_platform + '/api/widget/detail/' + widgetName;
   var widgetOriginName = '';
 
-  function loadWidgetName () {
-      return new Promise(function (resolve, reject) {
-          request.get({
-            url: remoteWidgetNameUrl
-          },function(err, res){
-            if(res.statusCode === 200){
-              widgetOriginName = JSON.parse(res.body).widget.name;;
-              if (typeof widgetAlias === 'string') {
-                return resolve(widgetAlias);
-              }else{
-                return resolve(JSON.parse(res.body).widget.name);
-              }
-            }else{
-              console.log(chalk.red('  出错了，' + remoteWidgetNameUrl + '接口出错，请联系liweitao'));
-              return resolve();
-            }
-          });
-
-      });
-    }
-  loadWidgetName()
-  .then(function(widgetName){
-    var widget = new Widget({
-      widgetName: widgetName,
-      description: option.description,
-      sass: true,
-      less: 0,
-      cms: 0
-    });
-    var moduleConfPath = widget.destinationPath('module-conf.js');
-    var appConfPath = path.join(path.resolve(widget.destinationRoot(), '..'), 'app-conf.js');
-    if (!fs.existsSync(moduleConfPath)) {
-      console.log(chalk.red('  出错了，当前目录没有module-conf.js，请检查当前目录是否是一个模块目录！'));
-      return;
-    }
-    widget.loadRemote(remoteUrl,widgetAlias, function () {
-    var argv = [].slice.call(arguments);
-    widget.renameContent(argv[0], widgetOriginName);
-    var appConf = require(appConfPath);
-    var moduleConf = require(moduleConfPath);
-    if (appConf) {
-      report('widget', addReportPath, argv, function (params) {
-        params.moduleName = moduleConf.module;
-        params.moduleId = moduleConf.moduleId;
-        params.appName = appConf.app;
-        params.appId = appConf.appId;
-        params.widget = argv[0];
-      }, function (body) {
-        if (option.debug) {
-          console.log(body);
+  function loadWidgetName() {
+    return new Promise(function (resolve, reject) {
+      request.get({
+        url: remoteWidgetNameUrl
+      }, function (err, res) {
+        if (res.statusCode === 200) {
+          widgetOriginName = JSON.parse(res.body).widget.name;;
+          if (typeof widgetAlias === 'string') {
+            return resolve(widgetAlias);
+          } else {
+            return resolve(JSON.parse(res.body).widget.name);
+          }
+        } else {
+          console.log(chalk.red('  出错了，' + remoteWidgetNameUrl + '接口出错，请联系liweitao'));
+          return resolve();
         }
       });
-    }
+
     });
-  });
+  }
+  loadWidgetName()
+    .then(function (widgetName) {
+      var widget = new Widget({
+        widgetName: widgetName,
+        description: option.description,
+        sass: true,
+        less: 0,
+        cms: 0
+      });
+      var moduleConfPath = widget.destinationPath('module-conf.js');
+      var appConfPath = path.join(path.resolve(widget.destinationRoot(), '..'), 'app-conf.js');
+      if (!fs.existsSync(moduleConfPath)) {
+        console.log(chalk.red('  出错了，当前目录没有module-conf.js，请检查当前目录是否是一个模块目录！'));
+        return;
+      }
+      widget.loadRemote(remoteUrl, widgetAlias, function () {
+        var argv = [].slice.call(arguments);
+        widget.renameContent(argv[0], widgetOriginName);
+        var appConf = require(appConfPath);
+        var moduleConf = require(moduleConfPath);
+        if (appConf) {
+          report('widget', addReportPath, argv, function (params) {
+            params.moduleName = moduleConf.module;
+            params.moduleId = moduleConf.moduleId;
+            params.appName = appConf.app;
+            params.appId = appConf.appId;
+            params.widget = argv[0];
+          }, function (body) {
+            if (option.debug) {
+              console.log(body);
+            }
+          });
+        }
+      });
+    });
 }
 
 // Command: peach delete
@@ -1038,8 +1065,8 @@ program
       var moduleName = option.module;
       var pageName = option.page;
       var widgetName = option.widget;
-      if (typeof(appName) !== 'string' && typeof(moduleName) !== 'string'
-        && typeof(pageName) !== 'string' && typeof(widgetName) !== 'string') {
+      if (typeof (appName) !== 'string' && typeof (moduleName) !== 'string' &&
+        typeof (pageName) !== 'string' && typeof (widgetName) !== 'string') {
         console.log(chalk.red('  请输入参数！'));
         console.log();
         console.log(chalk.red('  通过命令 ath del -h 可查看帮助'));
@@ -1054,7 +1081,7 @@ program
         var appConf = null;
         var moduleConf = null;
         if (Util.existsSync(appConfPath)) { // 项目根目录
-          if (typeof(moduleName) !== 'string') {
+          if (typeof (moduleName) !== 'string') {
             console.log(chalk.red('  在项目目录下，必须告知模块名！'));
             return;
           }
@@ -1068,17 +1095,17 @@ program
           moduleConf = require(moduleConfPath);
           deletePlace = 'app';
           // 删除模块
-          if (typeof(pageName) !== 'string' && typeof(widgetName) !== 'string') {
+          if (typeof (pageName) !== 'string' && typeof (widgetName) !== 'string') {
             deleteTypes.push('mod');
           } else {
-            if (typeof(pageName) === 'string') {
+            if (typeof (pageName) === 'string') {
               if (!Util.existsSync(path.join(cwd, moduleName, 'page', pageName))) {
                 console.log(chalk.red('  没有找到页面' + pageName + '，请检查当前目录是否符合规范！'));
                 return;
               }
               deleteTypes.push('page');
             }
-            if (typeof(widgetName) === 'string') {
+            if (typeof (widgetName) === 'string') {
               if (!Util.existsSync(path.join(cwd, moduleName, 'widget', widgetName))) {
                 console.log(chalk.red('  没有找到组件' + widgetName + '，请检查当前目录是否符合规范！'));
                 return;
@@ -1087,21 +1114,21 @@ program
             }
           }
         } else if (Util.existsSync(moduleConfPath)) { // 模块根目录
-          if (typeof(pageName) !== 'string' && typeof(widgetName) !== 'string') {
+          if (typeof (pageName) !== 'string' && typeof (widgetName) !== 'string') {
             console.log(chalk.red('  在模块目录下，必须告页面名或组件名！'));
             return;
           }
           appConf = require(path.join(path.resolve(cwd, '..'), 'app-conf'));
           moduleConf = require(moduleConfPath);
           deletePlace = 'module';
-          if (typeof(pageName) === 'string') {
+          if (typeof (pageName) === 'string') {
             if (!Util.existsSync(path.join(cwd, 'page', pageName))) {
               console.log(chalk.red('  没有找到页面' + pageName + '，请检查当前目录是否符合规范！'));
               return;
             }
             deleteTypes.push('page');
           }
-          if (typeof(widgetName) === 'string') {
+          if (typeof (widgetName) === 'string') {
             if (!Util.existsSync(path.join(cwd, 'widget', widgetName))) {
               console.log(chalk.red('  没有找到组件' + widgetName + '，请检查当前目录是否符合规范！'));
               return;
@@ -1109,7 +1136,7 @@ program
             deleteTypes.push('widget');
           }
         } else {
-          if (typeof(appName) !== 'string') {
+          if (typeof (appName) !== 'string') {
             console.log(chalk.red('  请输入项目名！'));
             return;
           }
@@ -1118,11 +1145,11 @@ program
           if (Util.existsSync(appPath)) {
             deletePlace = 'outside';
             appConf = require(path.join(appPath, 'app-conf'));
-            if (typeof(moduleName) !== 'string'
-              && typeof(pageName) !== 'string' && typeof(widgetName) !== 'string') {
+            if (typeof (moduleName) !== 'string' &&
+              typeof (pageName) !== 'string' && typeof (widgetName) !== 'string') {
               deleteTypes.push('app');
             } else {
-              if (typeof(moduleName) !== 'string') {
+              if (typeof (moduleName) !== 'string') {
                 console.log(chalk.red('  请输入模块名！'));
                 return;
               } else {
@@ -1132,17 +1159,17 @@ program
                   return;
                 }
                 moduleConf = require(moduleConfPath);
-                if (typeof(pageName) !== 'string' && typeof(widgetName) !== 'string') {
+                if (typeof (pageName) !== 'string' && typeof (widgetName) !== 'string') {
                   deleteTypes.push('mod');
                 } else {
-                  if (typeof(pageName) === 'string') {
+                  if (typeof (pageName) === 'string') {
                     if (!Util.existsSync(path.join(appPath, moduleName, 'page', pageName))) {
                       console.log(chalk.red('  没有找到页面' + pageName + '，请检查当前目录是否符合规范！'));
                       return;
                     }
                     deleteTypes.push('page');
                   }
-                  if (typeof(widgetName) === 'string') {
+                  if (typeof (widgetName) === 'string') {
                     if (!Util.existsSync(path.join(appPath, moduleName, 'widget', widgetName))) {
                       console.log(chalk.red('  没有找到组件' + widgetName + '，请检查当前目录是否符合规范！'));
                       return;
@@ -1180,7 +1207,7 @@ program
 /**
  * 删除操作，根据当前所处不同位置
  */
-function deleteOperation (deleteObj) {
+function deleteOperation(deleteObj) {
   if (!deleteObj) {
     return;
   }
@@ -1204,7 +1231,7 @@ function deleteOperation (deleteObj) {
 /**
  * 删除项目，模块，页面，组件，并上报数据
  */
-function deleteSth (cwd, deleteObj) {
+function deleteSth(cwd, deleteObj) {
   if (deleteObj.deleteTypes.indexOf('app') >= 0) { //删除项目
     deleteAtomic('app', '是否删除项目' + deleteObj.appName, cwd, null, function (params) {
       params.app = deleteObj.appConf.appId;
@@ -1237,7 +1264,8 @@ function deleteSth (cwd, deleteObj) {
           }
           fs.writeFileSync(path.join(cwd, 'app-conf.js'), appConfStrLines.join('\n'));
         }
-      }, function (params) {
+      },
+      function (params) {
         params.mod = deleteObj.moduleConf.moduleId;
       });
   } else {
@@ -1260,7 +1288,7 @@ function deleteSth (cwd, deleteObj) {
 /**
  * 删除目录文件
  */
-function deleteAtomic (cmd, confirmTip, delelePath, deleteCb, processParamsCb) {
+function deleteAtomic(cmd, confirmTip, delelePath, deleteCb, processParamsCb) {
   inquirer.prompt([{
     type: 'confirm',
     name: 'confirmDelete',
@@ -1268,7 +1296,9 @@ function deleteAtomic (cmd, confirmTip, delelePath, deleteCb, processParamsCb) {
     default: false
   }], function (answers) {
     if (answers.confirmDelete) {
-      del.sync(delelePath, {force: true});
+      del.sync(delelePath, {
+        force: true
+      });
       if (_.isFunction(deleteCb)) {
         deleteCb();
       }
@@ -1309,7 +1339,7 @@ program
       }
       builder.build(app, mod, option);
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach build');
@@ -1345,7 +1375,7 @@ program
       }
       builder.serve(app, mod, option);
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach serve');
@@ -1390,7 +1420,8 @@ program
           mod = option.module;
         }
       }
-      function checkVersionControl () {
+
+      function checkVersionControl() {
         return new Promise(function (resolve, reject) {
           var cwd = process.cwd();
           var appConfPath = path.join(cwd, 'app-conf.js');
@@ -1418,53 +1449,53 @@ program
       }
       checkVersionControl()
         .then(getGitStatus).then(function (status) {
-        if (!status.remoteBranch) {
-          console.log();
-          console.log(chalk.red('  检测到当前项目并未设置远程仓库，或者已经设置但并未提交代码！'));
-          console.log(chalk.red('  请将代码push到远程仓库后再进行发布！'));
-          console.log();
-          throw new Error('git interrupt');
-        }
-        if (status.clean) {
-          if (typeof status.remoteDiff === 'string' && status.remoteDiff.indexOf('ahead') >= 0) {
+          if (!status.remoteBranch) {
             console.log();
-            console.log(chalk.red('  检测到你有本地提交，但并未将代码提交至远程仓库！'));
+            console.log(chalk.red('  检测到当前项目并未设置远程仓库，或者已经设置但并未提交代码！'));
             console.log(chalk.red('  请将代码push到远程仓库后再进行发布！'));
             console.log();
             throw new Error('git interrupt');
           }
-        } else {
-          console.log();
-          console.log(chalk.red('  检测到你本地有代码改动！'));
-          console.log();
-          if (status.files.length > 0) {
-            status.files.forEach(function (item) {
-              console.log(chalk.red('    ' + item));
+          if (status.clean) {
+            if (typeof status.remoteDiff === 'string' && status.remoteDiff.indexOf('ahead') >= 0) {
+              console.log();
+              console.log(chalk.red('  检测到你有本地提交，但并未将代码提交至远程仓库！'));
+              console.log(chalk.red('  请将代码push到远程仓库后再进行发布！'));
+              console.log();
+              throw new Error('git interrupt');
+            }
+          } else {
+            console.log();
+            console.log(chalk.red('  检测到你本地有代码改动！'));
+            console.log();
+            if (status.files.length > 0) {
+              status.files.forEach(function (item) {
+                console.log(chalk.red('    ' + item));
+              });
+            }
+            console.log();
+            console.log(chalk.red('  请将代码push到远程仓库后再进行发布！'));
+            console.log();
+            throw new Error('git interrupt');
+          }
+        }, function (err) {
+          if (isDebug) {
+            console.log(err);
+          }
+        }).then(builder.publish.bind(null, app, mod, option)).then(function (argv) {
+          var args = argv.files;
+          if (argv.appConf) {
+            report('publish', addReportPath, args, function (params) {
+              params.appId = argv.appConf.appId;
             });
           }
-          console.log();
-          console.log(chalk.red('  请将代码push到远程仓库后再进行发布！'));
-          console.log();
-          throw new Error('git interrupt');
-        }
-      }, function (err) {
-        if (isDebug) {
-          console.log(err);
-        }
-      }).then(builder.publish.bind(null, app, mod, option)).then(function (argv) {
-        var args = argv.files;
-        if (argv.appConf) {
-          report('publish', addReportPath, args, function (params) {
-            params.appId = argv.appConf.appId;
-          });
-        }
-      }).catch(function (e) {
-        if (e.message !== 'git interrupt') {
-          console.log(e.stack);
-        }
-      });
+        }).catch(function (e) {
+          if (e.message !== 'git interrupt') {
+            console.log(e.stack);
+          }
+        });
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach publish');
@@ -1497,7 +1528,7 @@ program
       }
       builder.clone(widget, source, dest);
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach clone widgetName');
@@ -1515,7 +1546,7 @@ program
     remindNewVersion(function () {
       var moduleName = option.module;
       var widgetName = option.widget;
-      if (typeof(moduleName) !== 'string' && typeof(widgetName) !== 'string') {
+      if (typeof (moduleName) !== 'string' && typeof (widgetName) !== 'string') {
         console.log(chalk.red('  请输入参数！'));
         console.log();
         console.log(chalk.red('  通过命令 ath map -h 可查看帮助'));
@@ -1529,11 +1560,11 @@ program
         var moduleConf = null;
         var appPath = '';
         if (Util.existsSync(appConfPath)) { // 项目根目录
-          if (typeof(moduleName) !== 'string') {
+          if (typeof (moduleName) !== 'string') {
             console.log(chalk.red('  在项目目录下，必须告知模块名！'));
             return;
           }
-          if (typeof(widgetName) !== 'string') {
+          if (typeof (widgetName) !== 'string') {
             console.log(chalk.red('  请告知组件名称！'));
             return;
           }
@@ -1545,7 +1576,7 @@ program
           appConf = require(appConfPath);
           appPath = cwd;
         } else if (Util.existsSync(moduleConfPath)) { // 模块根目录
-          if (typeof(widgetName) !== 'string') {
+          if (typeof (widgetName) !== 'string') {
             console.log(chalk.red('  请告知组件名称！'));
             return;
           }
@@ -1579,7 +1610,9 @@ program
         var table = new Table({
           head: ['module', 'page'],
           colWidths: [20, 40],
-          style: { head: ['bgGreen'] }
+          style: {
+            head: ['bgGreen']
+          }
         });
         dependencyList.forEach(function (item) {
           table.push([item.module, item.page]);
@@ -1590,7 +1623,7 @@ program
         console.log();
       }
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach map -m module -w tab');
@@ -1598,7 +1631,7 @@ program
     console.log();
   });
 
-function getModuleMapDenpencyByWidget (appPath, moduleName, widgetName) {
+function getModuleMapDenpencyByWidget(appPath, moduleName, widgetName) {
   var mapJsonPath = path.join(appPath, moduleName, 'dist', 'map.json');
   var dependencyList = [];
   if (Util.existsSync(mapJsonPath)) {
@@ -1661,65 +1694,107 @@ program
           if (Util.existsSync(appConfPath)) {
             if (mod !== null) {
               if (typeof publish === 'string') {
-                del.sync(path.join(cacheRootPath, 'publish', mod, publish + '_filter.json'), { force: true });
+                del.sync(path.join(cacheRootPath, 'publish', mod, publish + '_filter.json'), {
+                  force: true
+                });
               } else {
-                del.sync(path.join(cacheRootPath, 'publish', mod), { force: true });
+                del.sync(path.join(cacheRootPath, 'publish', mod), {
+                  force: true
+                });
               }
             } else {
-              del.sync(path.join(cacheRootPath, 'publish'), { force: true });
+              del.sync(path.join(cacheRootPath, 'publish'), {
+                force: true
+              });
             }
           } else if (Util.existsSync(moduleConfPath)) {
             if (typeof publish === 'string') {
-              del.sync(path.join(cacheRootPath, 'publish', require(moduleConfPath).module, publish + '_filter.json'), { force: true });
+              del.sync(path.join(cacheRootPath, 'publish', require(moduleConfPath).module, publish + '_filter.json'), {
+                force: true
+              });
             } else {
-              del.sync(path.join(cacheRootPath, 'publish', require(moduleConfPath).module), { force: true });
+              del.sync(path.join(cacheRootPath, 'publish', require(moduleConfPath).module), {
+                force: true
+              });
             }
           }
         } else if (option.sass) {
           if (Util.existsSync(appConfPath)) {
             if (mod !== null) {
-              del.sync(path.join(cacheRootPath, 'sass', mod), { force: true });
+              del.sync(path.join(cacheRootPath, 'sass', mod), {
+                force: true
+              });
             } else {
-              del.sync(path.join(cacheRootPath, 'sass'), { force: true });
+              del.sync(path.join(cacheRootPath, 'sass'), {
+                force: true
+              });
             }
           } else if (Util.existsSync(moduleConfPath)) {
-            del.sync(path.join(cacheRootPath, 'sass', require(moduleConfPath).module), { force: true });
+            del.sync(path.join(cacheRootPath, 'sass', require(moduleConfPath).module), {
+              force: true
+            });
           }
         } else if (option.image) {
           if (Util.existsSync(appConfPath)) {
             if (mod !== null) {
-              del.sync(path.join(cacheRootPath, 'images', mod), { force: true });
+              del.sync(path.join(cacheRootPath, 'images', mod), {
+                force: true
+              });
             } else {
-              del.sync(path.join(cacheRootPath, 'images'), { force: true });
+              del.sync(path.join(cacheRootPath, 'images'), {
+                force: true
+              });
             }
-            del.sync(path.join(cacheRootPath, 'images'), { force: true });
+            del.sync(path.join(cacheRootPath, 'images'), {
+              force: true
+            });
           } else if (Util.existsSync(moduleConfPath)) {
-            del.sync(path.join(cacheRootPath, 'images', require(moduleConfPath).module), { force: true });
+            del.sync(path.join(cacheRootPath, 'images', require(moduleConfPath).module), {
+              force: true
+            });
           }
         } else if (option.template) {
-          del.sync(path.join(peachPath, 'tmp'), { force: true });
+          del.sync(path.join(peachPath, 'tmp'), {
+            force: true
+          });
         }
       } else {
-        del.sync(path.join(peachPath, 'tmp'), { force: true });
+        del.sync(path.join(peachPath, 'tmp'), {
+          force: true
+        });
         if (Util.existsSync(appConfPath)) {
           if (mod !== null) {
-            del.sync(path.join(cacheRootPath, 'publish', mod), { force: true });
-            del.sync(path.join(cacheRootPath, 'sass', mod), { force: true });
-            del.sync(path.join(cacheRootPath, 'images', mod), { force: true });
+            del.sync(path.join(cacheRootPath, 'publish', mod), {
+              force: true
+            });
+            del.sync(path.join(cacheRootPath, 'sass', mod), {
+              force: true
+            });
+            del.sync(path.join(cacheRootPath, 'images', mod), {
+              force: true
+            });
           } else {
-            del.sync(cacheRootPath, { force: true });
+            del.sync(cacheRootPath, {
+              force: true
+            });
           }
         } else if (Util.existsSync(moduleConfPath)) {
-          del.sync(path.join(cacheRootPath, 'publish', require(moduleConfPath).module), { force: true });
-          del.sync(path.join(cacheRootPath, 'sass', require(moduleConfPath).module), { force: true });
-          del.sync(path.join(cacheRootPath, 'images', require(moduleConfPath).module), { force: true });
+          del.sync(path.join(cacheRootPath, 'publish', require(moduleConfPath).module), {
+            force: true
+          });
+          del.sync(path.join(cacheRootPath, 'sass', require(moduleConfPath).module), {
+            force: true
+          });
+          del.sync(path.join(cacheRootPath, 'images', require(moduleConfPath).module), {
+            force: true
+          });
         }
       }
       console.log();
       console.log(chalk.green('  清除成功！'));
       console.log();
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach clear --publish preview');
@@ -1771,7 +1846,7 @@ program
       console.log();
       info ? console.log(info) : void(0);
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach update');
@@ -1791,7 +1866,7 @@ program
         console.log('  ' + i + '=' + config[i]);
       }
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach list-config');
@@ -1811,7 +1886,7 @@ program
         console.log('  ' + i + '=' + setting[i]);
       }
     });
-  }).on('--help', function() {
+  }).on('--help', function () {
     console.log('  Examples:');
     console.log('');
     console.log('    $ peach list-setting');
