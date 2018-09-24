@@ -1,4 +1,4 @@
-> Pepea 基于 [peaena](https://github.com/o2team/peaena) 构建
+# PEACH 基于 [peaena](https://github.com/o2team/peaena) 调整
 
 
 ## 功能一览
